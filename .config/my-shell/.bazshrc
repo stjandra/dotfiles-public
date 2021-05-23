@@ -1,0 +1,172 @@
+#################################
+# bash and zsh config.          #
+#                               #
+# Sourced by .bashrc and .zshrc #
+#################################
+
+# Disable "Can't follow non-constant source.
+# Use a directive to specify location." warning.
+# shellcheck disable=SC1090
+
+#############
+# Functions #
+#############
+
+getshell() {
+    ps -p$$ -ocommand=
+}
+
+isbash() {
+    [[ $(getshell) == *"bash"* ]]
+}
+
+iszsh() {
+    [[ $(getshell) == *"zsh"* ]];
+}
+
+# Reload .bashrc or .zshrc depending on the shell.
+so() {
+    if isbash; then
+        source "$HOME/.bashrc"
+    elif iszsh; then
+        source "$HOME/.zshrc"
+    fi
+}
+
+# Source if file exists and readable.
+mysource () {
+    [[ -r "$1" ]] && source "$1"
+}
+
+# Set tab title to $1.
+title() {
+    echo -ne "\033]0;$1\007"
+}
+
+# Working directory with '~'
+short_pwd() {
+    # Substitute home with '~'
+    pwd | sed "s|$HOME|~|"
+}
+
+# Set terminal tab title to working directory.
+title_pwd() {
+    title "$(short_pwd)"
+}
+
+# Go to a dir in ~/git
+cdg() {
+    cd "$HOME/git/$1" || exit
+}
+
+# Go to a dir in ~/.config
+cdc() {
+    cd "$HOME/.config/$1" || exit
+}
+
+path_append() {
+    # From
+    # https://superuser.com/a/39995
+    if [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]]; then
+        PATH="${PATH:+"$PATH:"}$1"
+    fi
+}
+
+path_prepend() {
+    # From
+    # https://superuser.com/a/39995
+    if [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]]; then
+        PATH="$1${PATH:+":$PATH"}"
+    fi
+}
+
+is_kitty() {
+    [[ $TERM == xterm-kitty ]];
+}
+
+my_alias() {
+    # If 3 args:
+    #   $1: condition
+    #   $2: alias name
+    #   $3: command
+    # If 2 args: Set command $1 to alias $0
+    if [[ $# == 3 ]]; then
+        my_alias_conditional "$1" "$2" "$3"
+
+    elif [[ $# == 2 ]]; then
+        # Disable "This expands when defined, not when used.
+        # Consider escaping." warning
+        # shellcheck disable=SC2139
+        alias "$1"="$2"
+    fi
+}
+
+my_alias_conditional() {
+    # If $1 is true, set command $3 to alias $2
+    if $1; then
+        my_alias "$2" "$3"
+    fi
+}
+
+########
+# PATH #
+########
+
+path_prepend '.'
+path_prepend "$HOME/git/scripts-public"
+
+if is_macos; then
+
+    path_prepend "$HOME/.jenv/bin"
+    path_prepend "$HOME/.rbenv/shims"
+    path_prepend /usr/local/opt/mysql@5.7/bin
+    path_prepend /Applications/kdiff3.app/Contents/MacOS
+    path_prepend /usr/local/sbin # brew
+
+elif is_linux; then
+
+    path_prepend "$HOME/.local/bin"
+    path_prepend "$HOME/git/jenv/bin"
+    path_prepend /opt/mysql-5.7.32-linux-glibc2.12-x86_64/bin
+fi
+
+###############
+# Environment #
+###############
+
+# Ignore "Declare and assign separately to avoid masking return values" warning.
+# shellcheck disable=SC2155
+export GPG_TTY=$(tty)
+
+# Enable less to open compressed files .gz etc.
+export LESSOPEN="|/usr/local/bin/lesspipe.sh %s" LESS_ADVANCED_PREPROCESSOR=1
+
+if is_linux; then
+    source /usr/share/doc/fzf/examples/key-bindings.bash
+    source /usr/share/doc/fzf/examples/completion.bash
+fi
+
+export FZF_DEFAULT_COMMAND='find .'
+export FZF_CTRL_T_COMMAND='find .'
+
+# jenv
+# Must be after jenv is added to path.
+if command -v jenv &> /dev/null; then
+    eval "$(jenv init -)"
+fi
+
+# pyenv
+if command -v pyenv &> /dev/null; then
+    eval "$(pyenv init -)"
+fi
+
+###########
+# Aliases #
+###########
+
+source "$HOME/.config/my-shell/aliases.config"
+
+# Kitty.
+if is_kitty; then
+    my_alias ssh "TERM=xterm ssh"
+fi
