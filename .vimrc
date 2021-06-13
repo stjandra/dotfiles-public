@@ -349,7 +349,7 @@ colorscheme PaperColor
 " Note the space at the end.
 set fillchars+=vert:\
 
-if has('macunix')
+if has ('macunix')
     " Mac
 
     " Use system clipboard.
@@ -370,8 +370,10 @@ else
 
     set clipboard=unnamedplus
 
-    " FZF.
-    source /usr/share/doc/fzf/examples/fzf.vim
+    " Source if exists.
+    if !empty(globpath(&rtp, '/usr/share/doc/fzf/examples/fzf.vim'))
+        source /usr/share/doc/fzf/examples/fzf.vim
+    endif
 endif
 
 set guifont=Fira\ Code\ Retina:h14
