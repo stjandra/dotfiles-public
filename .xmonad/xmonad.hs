@@ -17,6 +17,7 @@ import XMonad.Hooks.DynamicLog (PP(..), dynamicLogWithPP, shorten, wrap, xmobarP
 import XMonad.Hooks.EwmhDesktops (ewmh, fullscreenEventHook)
 import XMonad.Hooks.InsertPosition (Position(Below), Focus(Newer), insertPosition)
 import XMonad.Hooks.ManageDocks (AvoidStruts, ToggleStruts(..), avoidStruts, docks)
+import XMonad.Hooks.RefocusLast (RefocusLastLayoutHook, refocusLastLayoutHook, refocusLastWhen, refocusingIsActive)
 import XMonad.Hooks.SetWMName (setWMName)
 import XMonad.Hooks.UrgencyHook (NoUrgencyHook(..), focusUrgent, withUrgencyHook)
 import XMonad.Layout.NoBorders (SmartBorder, smartBorders)
@@ -245,7 +246,12 @@ myManageHook = insertPosition Below Newer <+> composeAll
 -- combine event hooks use mappend or mconcat from Data.Monoid.
 --
 myEventHook :: Event -> X All
-myEventHook = fullscreenEventHook
+myEventHook =
+  -- Refocus the last focused window after closing a window (especially a popup).
+  -- https://github.com/samhh/dotfiles/commit/d9e28572c7a413b83d09e21e54ec653f5dfba251
+  refocusLastWhen refocusingIsActive
+  -- Fullscreen e.g. Youtube on Chrome.
+  <+> fullscreenEventHook
 
 -----------------------------
 -- Status Bars and Logging --
@@ -331,7 +337,7 @@ myTitleSep = printf " <fc=%s>|</fc> " myColorTitleSep
 myStartupHook :: X ()
 myStartupHook = do
     --spawnOnce "~/.fehbg &" -- Set wallpaper.
-    spawnOnce "ssh-add"
+    spawnOnce "ssh-add &"
     spawnOnce "light-locker &"
     spawnOnce "nm-applet &"
     spawnOnce "volumeicon &"
@@ -357,7 +363,7 @@ main = do
 -- fields in the default config. Any you don't override, will
 -- use the defaults defined in xmonad/XMonad/Config.hs
 --
-myConfig :: Handle -> XConfig (ModifiedLayout SmartBorder (ModifiedLayout AvoidStruts MyLayout))
+myConfig :: Handle -> XConfig (ModifiedLayout SmartBorder (ModifiedLayout AvoidStruts (ModifiedLayout RefocusLastLayoutHook MyLayout)))
 myConfig logHandle = def {
       -- simple stuff
         terminal           = myTerminal,
@@ -374,7 +380,7 @@ myConfig logHandle = def {
         mouseBindings      = myMouseBindings,
 
       -- hooks, layouts
-        layoutHook         = smartBorders $ avoidStruts $ myLayout,
+        layoutHook         = smartBorders $ avoidStruts $ refocusLastLayoutHook $ myLayout,
         manageHook         = myManageHook,
         handleEventHook    = myEventHook,
         logHook            = myLogHook logHandle,
