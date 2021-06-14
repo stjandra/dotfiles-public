@@ -51,4 +51,4 @@ if is_macos; then
 fi
 
 # Source work config.
-source "$HOME/.config/my-work/.bazshrc"
+mysource "$HOME/.config/my-work/.bazshrc"

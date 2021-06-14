@@ -37,7 +37,7 @@ export PROMPT="$HOST_PROMPT%F{magenta}%~%f🐽 "
 mysource "$HOME/.fzf.zsh"
 
 # Source work config.
-source $HOME/.config/my-work/.bazshrc
+mysource $HOME/.config/my-work/.bazshrc
 
 ################
 # Key Bindings #
