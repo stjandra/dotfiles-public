@@ -21,11 +21,7 @@ function cdc -d 'Go to a dir in $HOME/.config' -a dir
 end
 
 function is_kitty
-    if test -n $TERM && test "$TERM" = "xterm-kitty"
-        return 0
-    else
-        return 1
-    end
+    test -n $TERM && test "$TERM" = "xterm-kitty"
 end
 
 function my_alias -d 'Create an abbrv.'
@@ -172,7 +168,7 @@ source $HOME/.config/my-shell/aliases.config
 # Fish specific aliases.
 my_alias so "source $HOME/.config/fish/config.fish" # Reload fish config.
 
-if is_kitty
-    # Cannot use abbr because some abbr use ssh.
-    alias ssh "TERM=xterm command ssh"
-end
+#if is_kitty
+#    # Cannot use abbr because some abbr use ssh.
+#    alias ssh "TERM=xterm command ssh"
+#end
