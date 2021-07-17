@@ -371,7 +371,8 @@ else
     set clipboard=unnamedplus
 
     " Source if exists.
-    if !empty(globpath(&rtp, '/usr/share/doc/fzf/examples/fzf.vim'))
+    " https://stackoverflow.com/a/3098685
+    if filereadable("/usr/share/doc/fzf/examples/fzf.vim")
         source /usr/share/doc/fzf/examples/fzf.vim
     endif
 endif
