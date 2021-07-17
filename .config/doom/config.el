@@ -140,6 +140,15 @@
 (require 'vimrc-mode)
 (add-to-list 'auto-mode-alist '("\\.vim\\(rc\\)?\\'" . vimrc-mode))
 
+(use-package! python
+  :defer t
+  :config
+  ;; https://emacs-lsp.github.io/dap-mode/page/configuration/#python
+  (require 'dap-python)
+  :custom
+  (dap-python-debugger 'debugpy)
+  )
+
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Source other files ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;
