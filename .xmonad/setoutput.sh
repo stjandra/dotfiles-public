@@ -24,9 +24,9 @@ if [[ ${#screens[@]} == 1 ]]; then
 fi
 
 if [[ " ${screens[*]} " =~ " ${DP3} " ]]; then
-    # Set DP3 above internal.
+    # Set DP3 right of internal.
     output "Has $DP3"
-    xrandr --output "$DP3" --auto --above "$internal"
+    xrandr --output "$DP3" --auto --right-of "$internal"
     xrandr --output "$DP3" --primary
 fi
 

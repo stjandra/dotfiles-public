@@ -15,7 +15,6 @@ import XMonad.Actions.NoBorders (toggleBorder)
 import XMonad.Layout.Decoration (Decoration, DefaultShrinker, ModifiedLayout)
 import XMonad.Hooks.DynamicLog (PP(..), dynamicLogWithPP, shorten, wrap, xmobarPP, xmobarColor)
 import XMonad.Hooks.EwmhDesktops (ewmh, fullscreenEventHook)
-import XMonad.Hooks.InsertPosition (Position(Below), Focus(Newer), insertPosition)
 import XMonad.Hooks.ManageDocks (AvoidStruts, ToggleStruts(..), avoidStruts, docks)
 import XMonad.Hooks.RefocusLast (RefocusLastLayoutHook, refocusLastLayoutHook, refocusLastWhen, refocusingIsActive)
 import XMonad.Hooks.SetWMName (setWMName)
@@ -74,6 +73,9 @@ myModMask = mod4Mask
 myWorkspaces :: [String]
 myWorkspaces = ["0","1","2","3","4","5","6","7","8","9"]
 
+myColorBlack :: String
+myColorBlack = "#000000"
+
 -- Colors from https://flatuicolors.com/palette/defo
 myColorPomegranate  :: String
 myColorCloud        :: String
@@ -118,7 +120,7 @@ myColorMagentaPurple   = "#6F1E51"
 myNormalBorderColor  :: String
 myFocusedBorderColor :: String
 myNormalBorderColor  = myColorMidnightBlue
-myFocusedBorderColor = myColorBaraRed
+myFocusedBorderColor = myColorLavenderRose
 
 myColorActive   :: String
 myColorInactive :: String
@@ -205,7 +207,7 @@ myTabConfig = def { activeColor = myFocusedBorderColor
                   , activeBorderColor = myFocusedBorderColor
                   , inactiveBorderColor = myNormalBorderColor
                   , urgentBorderColor = myColorUrgent
-                  , activeTextColor = myColorCloud
+                  , activeTextColor = myColorBlack
                   , inactiveTextColor = myColorAsbestos
                   , urgentTextColor = myColorCloud
                   , fontName = "xft:Fira Code:weight=bold:pixelsize=13:antialias=true:hinting=true"
@@ -229,7 +231,9 @@ myTabConfig = def { activeColor = myFocusedBorderColor
 -- 'className' and 'resource' are used below.
 --
 myManageHook :: ManageHook
-myManageHook = insertPosition Below Newer <+> composeAll
+myManageHook =
+--  insertPosition Below Newer <+>
+  composeAll
     [ className =? "MPlayer"        --> doFloat
     , className =? "Gimp"           --> doFloat
     , resource  =? "desktop_window" --> doIgnore
@@ -356,7 +360,7 @@ myStartupHook = do
 main :: IO ()
 main = do
   spawn "$HOME/.xmonad/setoutput.sh" -- Display need to be set before creating Xmobar.
-  myXmobar <- spawnPipe "xmobar -x 1"
+  myXmobar <- spawnPipe "xmobar -x 2"
   xmonad $ docks $ ewmh $ withUrgencyHook NoUrgencyHook $ myConfig myXmobar
 
 -- A structure containing your configuration settings, overriding
@@ -488,6 +492,11 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- Adjust brightness
     , ((0, xF86XK_MonBrightnessUp), spawn "xbacklight -inc 5%")
     , ((0, xF86XK_MonBrightnessDown), spawn "xbacklight -dec 5%")
+
+    -- A 65% keyboard does not have a dedicated backtick '`' key.
+    -- Also use mod+esc for workspace 0.
+    , ((modm              , xK_Escape), windows $ W.greedyView "0")
+    , ((modm .|. shiftMask, xK_Escape), windows $ W.shift "0")
     ]
     ++
 
@@ -504,7 +513,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- mod-shift-{w,e,r}, Move client to screen 1, 2, or 3
     --
     [((m .|. modm, key), screenWorkspace sc >>= flip whenJust (windows . f))
-        | (key, sc) <- zip [xK_w, xK_e, xK_r] [0..]
+        | (key, sc) <- zip [xK_e, xK_w, xK_r] [0..]
         , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
 
 myAdditionalKeys :: [(String, X ())]
@@ -523,8 +532,9 @@ myAdditionalKeys =
     , ("M-x v",   spawn (printf "%s vifm" myTerminal))
 
       -- dmenu scripts.
-    , ("M-d s",   spawn $ myDmenuScript "$HOME/git/scripts-dmenu-public/dm_shutdown")
     , ("M-d c",   spawn $ myDmenuScript "$HOME/git/scripts-dmenu-public/dm_copypaste")
+    , ("M-d s",   spawn $ myDmenuScript "$HOME/git/scripts-dmenu-public/dm_shutdown")
+    , ("M-d t",   spawn $ myDmenuScript "$HOME/git/scripts-dmenu-public/dm_tmux_session")
     ]
 
 --myAdditionalMouseBindings =
@@ -578,8 +588,9 @@ help = unlines ["The modifier key is 'super'. Keybindings:",
     "M-x v    Vifm",
     "",
     "-- Launch a dmenu script",
-    "M-d s   Shutdown menu",
     "M-d c   Copy menu",
+    "M-d s   Shutdown menu",
+    "M-d t   tmux session menu",
     "",
     "-- Move focus up or down the window stack",
     "mod-Tab        Move focus to the next window",
