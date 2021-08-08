@@ -6,11 +6,11 @@ import Control.Monad (liftM, sequence)
 import Data.List (intercalate)
 import Data.Monoid (All)
 import GHC.IO.Handle.Types (Handle)
-import Graphics.X11.ExtraTypes.XF86
 import System.Exit (exitSuccess)
 import System.IO (hPutStrLn)
 import Text.Printf (printf)
 import XMonad
+import XMonad.Actions.CycleWS (nextScreen, prevScreen)
 import XMonad.Actions.NoBorders (toggleBorder)
 import XMonad.Layout.Decoration (Decoration, DefaultShrinker, ModifiedLayout)
 import XMonad.Hooks.DynamicLog (PP(..), dynamicLogWithPP, shorten, wrap, xmobarPP, xmobarColor)
@@ -76,58 +76,55 @@ myWorkspaces = ["0","1","2","3","4","5","6","7","8","9"]
 myColorBlack :: String
 myColorBlack = "#000000"
 
--- Colors from https://flatuicolors.com/palette/defo
-myColorPomegranate  :: String
-myColorCloud        :: String
-myColorSilver       :: String
-myColorAsbestos     :: String
-myColorConcrete     :: String
-myColorWetAsphalt   :: String
-myColorMidnightBlue :: String
-myColorPomegranate  = "#c0392b"
-myColorCloud        = "#ecf0f1"
-myColorSilver       = "#bdc3c7"
-myColorAsbestos     = "#7f8c8d"
-myColorConcrete     = "#95a5a6"
-myColorWetAsphalt   = "#34495e"
-myColorMidnightBlue = "#2c3e50"
+-- Colors from https://www.nordtheme.com/docs/colors-and-palettes
+myColorNordPolarNight1 :: String
+myColorNordPolarNight2 :: String
+myColorNordPolarNight3 :: String
+myColorNordPolarNight4 :: String
+myColorNordPolarNight1 = "#2e3440"
+myColorNordPolarNight2 = "#3b4252"
+myColorNordPolarNight3 = "#434c5e"
+myColorNordPolarNight4 = "#4c566a"
 
--- Colors from https://flatuicolors.com/palette/nl
-myColorRedPigment      :: String
-myColorMediterranean   :: String
-myColorBlueMartina     :: String
-myColorLavenderRose    :: String
-myColorLavenderTea     :: String
-myColorForgottenPurple :: String
-myColorCircumorbital   :: String
-myColorBaraRed         :: String
-myColorVeryBerry       :: String
-myColorHollyhock       :: String
-myColorMagentaPurple   :: String
-myColorRedPigment      = "#EA2027"
-myColorMediterranean   = "#1289A7"
-myColorBlueMartina     = "#12CBC4"
-myColorLavenderRose    = "#FDA7DF"
-myColorLavenderTea     = "#D980FA"
-myColorForgottenPurple = "#9980FA"
-myColorCircumorbital   = "#5758BB"
-myColorBaraRed         = "#ED4C67"
-myColorVeryBerry       = "#B53471"
-myColorHollyhock       = "#833471"
-myColorMagentaPurple   = "#6F1E51"
+myColorNordSnowStorm1 :: String
+myColorNordSnowStorm2 :: String
+myColorNordSnowStorm3 :: String
+myColorNordSnowStorm1 = "#d8dee9"
+myColorNordSnowStorm2 = "#e5e9f0"
+myColorNordSnowStorm3 = "#eceff4"
+
+myColorNordFrost1 :: String
+myColorNordFrost2 :: String
+myColorNordFrost3 :: String
+myColorNordFrost4 :: String
+myColorNordFrost1 = "#8fbcbb"
+myColorNordFrost2 = "#88c0d0"
+myColorNordFrost3 = "#81a1c1"
+myColorNordFrost4 = "#5e81ac"
+
+myColorNordAuroraRed    :: String
+myColorNordAuroraOrange :: String
+myColorNordAuroraYellow :: String
+myColorNordAuroraGreen  :: String
+myColorNordAuroraPurple :: String
+myColorNordAuroraRed    = "#bf616a"
+myColorNordAuroraOrange = "#d08770"
+myColorNordAuroraYellow = "#ebcb8b"
+myColorNordAuroraGreen  = "#a3be8c"
+myColorNordAuroraPurple = "#b48ead"
 
 -- Border colors for unfocused and focused windows, respectively.
 myNormalBorderColor  :: String
 myFocusedBorderColor :: String
-myNormalBorderColor  = myColorMidnightBlue
-myFocusedBorderColor = myColorLavenderRose
+myNormalBorderColor  = myColorNordPolarNight4
+myFocusedBorderColor = myColorNordFrost2
 
 myColorActive   :: String
 myColorInactive :: String
 myColorUrgent   :: String
-myColorActive   = myColorLavenderRose
-myColorInactive = myColorSilver
-myColorUrgent   = myColorPomegranate
+myColorActive   = myColorNordFrost2
+myColorInactive = myColorNordSnowStorm1
+myColorUrgent   = myColorNordAuroraRed
 
 myColorPpCurrent       :: String
 myColorPpVisible       :: String
@@ -147,7 +144,7 @@ myColorPpTitleNotFocus = myColorInactive
 myColorTitleSep        = myColorInactive
 
 myColorDmenu :: String
-myColorDmenu = myColorMagentaPurple
+myColorDmenu = myColorNordPolarNight2
 
 -- dmenu args.
 myDmenuArgs :: String
@@ -207,9 +204,9 @@ myTabConfig = def { activeColor = myFocusedBorderColor
                   , activeBorderColor = myFocusedBorderColor
                   , inactiveBorderColor = myNormalBorderColor
                   , urgentBorderColor = myColorUrgent
-                  , activeTextColor = myColorBlack
-                  , inactiveTextColor = myColorAsbestos
-                  , urgentTextColor = myColorCloud
+                  , activeTextColor = myColorNordPolarNight1
+                  , inactiveTextColor = myColorInactive
+                  , urgentTextColor = myColorInactive
                   , fontName = "xft:Fira Code:weight=bold:pixelsize=13:antialias=true:hinting=true"
                   , decoHeight = 20
                   }
@@ -402,102 +399,11 @@ myConfig logHandle = def {
 myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ())
 myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
-    -- Launch a terminal
-    [ ((modm .|. shiftMask, xK_Return), spawn $ XMonad.terminal conf)
-
-    -- Launch dmenu desktop
-    , ((modm,               xK_p     ), spawn myDmenuDesktop)
-
-    -- Launch dmenu
-    , ((modm .|. shiftMask, xK_p     ), spawn myDmenu)
-
-    -- Close focused window
-    , ((modm .|. shiftMask, xK_c     ), kill)
-
-    -- Rotate through the available layout algorithms
-    , ((modm,               xK_space ), sendMessage NextLayout)
-
-    -- Reset the layouts on the current workspace to default
-    , ((modm .|. shiftMask, xK_space ), setLayout $ XMonad.layoutHook conf)
-
-    -- Resize viewed windows to the correct size
-    , ((modm,               xK_n     ), refresh)
-
-    -- Move focus to the next window
-    , ((modm,               xK_Tab   ), windows W.focusDown)
-
-    -- Move focus to the next window
-    , ((modm,               xK_j     ), windows W.focusDown)
-
-    -- Move focus to the previous window
-    , ((modm,               xK_k     ), windows W.focusUp  )
-
-    -- Move focus to the master window
-    , ((modm,               xK_m     ), windows W.focusMaster  )
-
-    -- Swap the focused window and the master window
-    , ((modm,               xK_Return), windows W.swapMaster)
-
-    -- Focus the most recently urgent window
-    , ((modm,               xK_u     ), focusUrgent)
-
-    -- Swap the focused window with the next window
-    , ((modm .|. shiftMask, xK_j     ), windows W.swapDown  )
-
-    -- Swap the focused window with the previous window
-    , ((modm .|. shiftMask, xK_k     ), windows W.swapUp    )
-
-    -- Shrink the master area
-    , ((modm,               xK_h     ), sendMessage Shrink)
-
-    -- Expand the master area
-    , ((modm,               xK_l     ), sendMessage Expand)
-
-    -- Push window back into tiling
-    , ((modm,               xK_t     ), withFocused $ windows . W.sink)
-
-    -- Increment the number of windows in the master area
-    , ((modm              , xK_comma ), sendMessage (IncMasterN 1))
-
-    -- Deincrement the number of windows in the master area
-    , ((modm              , xK_period), sendMessage (IncMasterN (-1)))
-
-    -- Toggle the status bar gap
-    -- Use this binding with avoidStruts from Hooks.ManageDocks.
-    -- See also the statusBar function from Hooks.DynamicLog.
-    --
-    , ((modm              , xK_b     ), sendMessage ToggleStruts)
-
-    -- Toggle the border of focused window.
-    -- Also push window back into tiling to fill the space left by the border.
-    , ((modm .|. shiftMask, xK_b     ), sequence_ [withFocused toggleBorder, withFocused $ windows . W.sink])
-
-    -- Quit xmonad
-    , ((modm .|. shiftMask, xK_q     ), io (exitSuccess))
-
-    -- Restart xmonad
-    , ((modm              , xK_q     ), spawn "xmonad --recompile; xmonad --restart")
-
-    -- Run xmessage with a summary of the default keybindings (useful for beginners)
-    , ((modm .|. shiftMask, xK_slash ), spawn ("echo \"" ++ help ++ "\" | xmessage -file -"))
-
-    -- Suspend
-    , ((modm .|. shiftMask, xK_s     ), spawn "systemctl suspend")
-
-    -- Adjust volume
-    , ((0, xF86XK_AudioLowerVolume   ), spawn "amixer set Speaker 5%-")
-    , ((0, xF86XK_AudioRaiseVolume   ), spawn "amixer set Speaker 5%+")
-    , ((0, xF86XK_AudioMute          ), spawn "$HOME/git/scripts-public/amixer_toggle")
-
-    -- Adjust brightness
-    , ((0, xF86XK_MonBrightnessUp), spawn "xbacklight -inc 5%")
-    , ((0, xF86XK_MonBrightnessDown), spawn "xbacklight -dec 5%")
-
-    -- A 65% keyboard does not have a dedicated backtick '`' key.
-    -- Also use mod+esc for workspace 0.
-    , ((modm              , xK_Escape), windows $ W.greedyView "0")
-    , ((modm .|. shiftMask, xK_Escape), windows $ W.shift "0")
+    [
+      -- Reset the layouts on the current workspace to default
+      ((modm .|. shiftMask, xK_space ), setLayout $ XMonad.layoutHook conf)
     ]
+
     ++
 
     -- Backtick/grave key: worskspace 0
@@ -519,13 +425,110 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 myAdditionalKeys :: [(String, X ())]
 myAdditionalKeys =
     [
-      -- Commonly used apps.
-      ("M-x c",   spawn "google-chrome")
+      ("M-<Return>", spawn myTerminal)
+
+      -- Launch dmenu desktop
+    , ("M-p", spawn myDmenuDesktop)
+
+      -- Launch dmenu
+    , ("M-S-p", spawn myDmenu)
+
+      -- Close focused window
+    , ("M-S-c", kill)
+
+      -- Rotate through the available layout algorithms
+    , ("M-<Space>", sendMessage NextLayout)
+
+    -- Resize viewed windows to the correct size
+    , ("M-n", refresh)
+
+    -- Move focus to the next window
+    , ("M-<Tab>", windows W.focusDown)
+
+    -- Move focus to the next window
+    , ("M-j", windows W.focusDown)
+
+    -- Move focus to the previous window
+    , ("M-k", windows W.focusUp)
+
+    -- Move focus to the master window
+    , ("M-m", windows W.focusMaster)
+
+    -- Swap the focused window and the master window
+    , ("M-S-<Return>", windows W.swapMaster)
+
+    -- Focus the most recently urgent window
+    , ("M-u", focusUrgent)
+
+    -- Swap the focused window with the next window
+    , ("M-S-j", windows W.swapDown)
+
+    -- Swap the focused window with the previous window
+    , ("M-S-k", windows W.swapUp)
+
+    -- Shrink the master area
+    , ("M-h", sendMessage Shrink)
+
+    -- Expand the master area
+    , ("M-l", sendMessage Expand)
+
+    -- Push window back into tiling
+    , ("M-t", withFocused $ windows . W.sink)
+
+    -- Move focus to next screen
+    , ("M-.", nextScreen)
+
+    -- Move focus to previous screen
+    , ("M-,", prevScreen)
+
+    -- Increment the number of windows in the master area
+    , ("M-S-.", sendMessage (IncMasterN 1))
+
+    -- Deincrement the number of windows in the master area
+    , ("M-S-,", sendMessage (IncMasterN (-1)))
+
+    -- Toggle the status bar gap
+    -- Use this binding with avoidStruts from Hooks.ManageDocks.
+    -- See also the statusBar function from Hooks.DynamicLog.
+    --
+    , ("M-b", sendMessage ToggleStruts)
+
+    -- Toggle the border of focused window.
+    -- Also push window back into tiling to fill the space left by the border.
+    , ("M-S-b", sequence_ [withFocused toggleBorder, withFocused $ windows . W.sink])
+
+    -- Quit xmonad
+    , ("M-S-q", io (exitSuccess))
+
+    -- Restart xmonad
+    , ("M-q", spawn "xmonad --recompile; xmonad --restart")
+
+    -- Run xmessage with a summary of the default keybindings (useful for beginners)
+    , ("M-S-/", spawn ("echo \"" ++ help ++ "\" | xmessage -file -"))
+
+    -- Suspend
+    , ("M-S-s", spawn "systemctl suspend")
+
+    -- Adjust volume
+    , ("<XF86AudioLowerVolume>", spawn "amixer set Speaker 5%-")
+    , ("<XF86AudioRaiseVolume>", spawn "amixer set Speaker 5%+")
+    , ("<XF86AudioMute>", spawn "$HOME/git/scripts-public/amixer_toggle")
+
+    -- Adjust brightness
+    , ("<XF86MonBrightnessUp>", spawn "xbacklight -inc 3%")
+    , ("<XF86MonBrightnessDown>", spawn "xbacklight -dec 3%")
+
+    -- A 65% keyboard does not have a dedicated backtick '`' key.
+    -- Also use mod+esc for workspace 0.
+    , ("M-<Esc>", windows $ W.greedyView "0")
+    , ("M-S-<Esc>", windows $ W.shift "0")
+
+      -- Launch apps.
+    , ("M-x c",   spawn "google-chrome")
     , ("M-x e",   spawn "emacs")
     , ("M-x f",   spawn "firefox")
     , ("M-x S-f", spawn "thunar")
     , ("M-x i",   spawn "gtk-launch jetbrains-idea-ce")
-    , ("M-x k",   spawn "kitty")
     , ("M-x s",   spawn "flameshot gui")
     , ("M-x S-s", spawn "SoapUI-5.6.0")
     , ("M-x t",   spawn "thunderbird")
@@ -567,7 +570,7 @@ help :: String
 help = unlines ["The modifier key is 'super'. Keybindings:",
     "",
     "-- Launching and killing programs",
-    "mod-Shift-Enter  Launch xterminal",
+    "mod-Enter        Launch xterminal",
     "mod-p            Launch dmenu with .desktop files",
     "mod-Shift-p      Launch dmenu",
     "mod-Shift-c      Close/kill the focused window",
@@ -601,7 +604,7 @@ help = unlines ["The modifier key is 'super'. Keybindings:",
     "mod-u          Move focus to the most recently urgent window",
     "",
     "-- Modifying the window order",
-    "mod-Return   Swap the focused window and the master window",
+    "mod-Shift-Return   Swap the focused window and the master window",
     "mod-Shift-j  Swap the focused window with the next window",
     "mod-Shift-k  Swap the focused window with the previous window",
     "",
@@ -613,8 +616,8 @@ help = unlines ["The modifier key is 'super'. Keybindings:",
     "mod-t  Push window back into tiling; unfloat and re-tile it",
     "",
     "-- Increase or decrease number of windows in the master area",
-    "mod-comma  (mod-,)   Increment the number of windows in the master area",
-    "mod-period (mod-.)   Deincrement the number of windows in the master area",
+    "mod-Shift-comma  (mod-,)   Increment the number of windows in the master area",
+    "mod-Shift-period (mod-.)   Deincrement the number of windows in the master area",
     "",
     "-- Quit or restart",
     "mod-Shift-q  Quit xmonad",
@@ -632,6 +635,8 @@ help = unlines ["The modifier key is 'super'. Keybindings:",
     "mod-Shift-[1..9]   Move client to workspace N",
     "mod-{w,e,r}        Switch to physical/Xinerama screens 1, 2, or 3",
     "mod-Shift-{w,e,r}  Move client to screen 1, 2, or 3",
+    "mod-comma  (mod-,) Move focus to the next screen",
+    "mod-period (mod-.) Move focus to the previous screen",
     "",
     "-- Mouse bindings: default actions bound to mouse events",
     "mod-button1  Set the window to floating mode and move by dragging",
