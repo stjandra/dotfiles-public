@@ -77,12 +77,12 @@
 (remove-hook 'doom-first-buffer-hook #'smartparens-global-mode)
 
 ;; Set transparency on Mac only.
-(cond ((string-equal system-type "darwin")
-       ;; https://www.emacswiki.org/emacs/TransparentEmacs
-       (set-frame-parameter (selected-frame) 'alpha '(95 . 90))
-       (add-to-list 'default-frame-alist '(alpha . (95 . 90)))
-       )
-      )
+;;(cond ((string-equal system-type "darwin")
+;;       ;; https://www.emacswiki.org/emacs/TransparentEmacs
+;;       (set-frame-parameter (selected-frame) 'alpha '(95 . 90))
+;;       (add-to-list 'default-frame-alist '(alpha . (95 . 90)))
+;;       )
+;;      )
 
 ;;;;;;;;;;;;;;
 ;; Org Mode ;;
@@ -136,15 +136,17 @@
     )
   )
 
+;; Disable hl-line-mode in rainbow-mode
+;; https://github.com/hlissner/doom-emacs/blob/develop/modules/tools/rgb/README.org
+(add-hook! 'rainbow-mode-hook
+  (hl-line-mode (if rainbow-mode -1 +1)))
+
 ;; https://github.com/mcandre/vimrc-mode
 (require 'vimrc-mode)
 (add-to-list 'auto-mode-alist '("\\.vim\\(rc\\)?\\'" . vimrc-mode))
 
 (use-package! python
   :defer t
-  :config
-  ;; https://emacs-lsp.github.io/dap-mode/page/configuration/#python
-  (require 'dap-python)
   :custom
   (dap-python-debugger 'debugpy)
   )

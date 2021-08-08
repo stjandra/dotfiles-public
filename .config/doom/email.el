@@ -2,7 +2,7 @@
 
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
-(setq user-full-name "Fistname Lastname"
+(setq user-full-name "Firstname Lastname"
       user-mail-address "user@gmail.com")
 
 ;;;;;;;;;;
@@ -15,7 +15,7 @@
   (setq mu4e-change-filenames-when-moving t)
 
   ;; Doom "+gmail" module flag disables this.
-  ;; If this is disabled, recently moved messages will dissapear (out of sync).
+  ;; If this is disabled, recently moved messages will disappear (out of sync).
   ;; But enabling this has some performance penalty.
   (setq mu4e-index-cleanup t)
 
