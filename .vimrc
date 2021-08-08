@@ -19,6 +19,7 @@ Plug 'itchyny/lightline.vim'
 
 " Themes.
 Plug 'NLKNguyen/papercolor-theme'
+Plug 'joshdick/onedark.vim'
 
 " Completion.
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
@@ -44,6 +45,9 @@ Plug 'junegunn/fzf.vim'
 " On-demand loading.
 Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
 
+" Better syntax highlighting.
+Plug 'sheerun/vim-polyglot'
+
 " LaTeX.
 Plug 'lervag/vimtex'
 
@@ -63,7 +67,7 @@ if !has('gui_running')
 endif
 
 let g:lightline = {
-            \ 'colorscheme': 'PaperColor',
+            \ 'colorscheme': 'one',
             \ 'component': {
             \   'lineinfo': ' %3l:%-2v',
             \ },
@@ -156,6 +160,11 @@ set updatetime=100
 
 " vimtex
 set encoding=utf8
+
+" vim-polyglot
+" Disable conceal (changing ',' into vertical lines)
+" https://github.com/chrisbra/csv.vim#concealing
+let g:csv_no_conceal = 1
 
 """"""""""""""""""
 " Plugin Rebinds "
@@ -341,9 +350,17 @@ set ttimeoutlen=0
 " Open new split below or to the right of the current pane.
 set splitbelow splitright
 
+" True colors
+" https://github.com/tmux/tmux/issues/1246#issue-292083184
+if exists('+termguicolors')
+  let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+  let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+  set termguicolors
+endif
+
 " Colorscheme
 set background=dark
-colorscheme PaperColor
+colorscheme onedark
 
 " Removes pipe | separator from vertical splits.
 " Note the space at the end.
