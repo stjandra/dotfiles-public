@@ -9,16 +9,17 @@ import GHC.IO.Handle.Types (Handle)
 import System.Exit (exitSuccess)
 import System.IO (hPutStrLn)
 import Text.Printf (printf)
-import XMonad
+import XMonad hiding ( (|||) )
 import XMonad.Actions.CycleWS (nextScreen, prevScreen)
 import XMonad.Actions.NoBorders (toggleBorder)
-import XMonad.Layout.Decoration (Decoration, DefaultShrinker, ModifiedLayout)
 import XMonad.Hooks.DynamicLog (PP(..), dynamicLogWithPP, shorten, wrap, xmobarPP, xmobarColor)
 import XMonad.Hooks.EwmhDesktops (ewmh, fullscreenEventHook)
 import XMonad.Hooks.ManageDocks (AvoidStruts, ToggleStruts(..), avoidStruts, docks)
 import XMonad.Hooks.RefocusLast (RefocusLastLayoutHook, refocusLastLayoutHook, refocusLastWhen, refocusingIsActive)
 import XMonad.Hooks.SetWMName (setWMName)
 import XMonad.Hooks.UrgencyHook (NoUrgencyHook(..), focusUrgent, withUrgencyHook)
+import XMonad.Layout.Decoration (Decoration, DefaultShrinker, ModifiedLayout)
+import XMonad.Layout.LayoutCombinators
 import XMonad.Layout.NoBorders (SmartBorder, smartBorders)
 import XMonad.Layout.Simplest (Simplest)
 import XMonad.Layout.Tabbed (TabbedDecoration(..), Theme(..), shrinkText, tabbed)
@@ -174,15 +175,15 @@ myDmenuScript dMenuScript = printf "%s %s" dMenuScript myDmenuArgs
 -- The available layouts.  Note that each layout is separated by |||,
 -- which denotes layout choice.
 --
-type MyLayout = (Choose TwoPane (Choose (ModifiedLayout (Decoration TabbedDecoration DefaultShrinker) Simplest) Full))
+type MyLayout = (NewSelect Tall (NewSelect TwoPane (NewSelect (ModifiedLayout (Decoration TabbedDecoration DefaultShrinker) Simplest) Full)))
 myLayout :: MyLayout Window
-myLayout = twoPane ||| myTabbed ||| Full
+myLayout = tiled ||| twoPane ||| myTabbed ||| Full
   where
      -- Default tiling algorithm partitions the screen into two panes
-     --tiled   = Tall nmaster delta ratio
+     tiled   = Tall nmaster delta ratio
 
      -- The default number of windows in the master pane
-     --nmaster = 1
+     nmaster = 1
 
      -- Default proportion of screen occupied by master pane
      ratio   = 1/2
@@ -538,6 +539,12 @@ myAdditionalKeys =
     , ("M-d c",   spawn $ myDmenuScript "$HOME/git/scripts-dmenu-public/dm_copypaste")
     , ("M-d s",   spawn $ myDmenuScript "$HOME/git/scripts-dmenu-public/dm_shutdown")
     , ("M-d t",   spawn $ myDmenuScript "$HOME/git/scripts-dmenu-public/dm_tmux_session")
+
+      -- Layout.
+    , ("M-a g",   sendMessage $ JumpToLayout "Tall")
+    , ("M-a 2",   sendMessage $ JumpToLayout "TwoPane")
+    , ("M-a t",   sendMessage $ JumpToLayout "Tabbed Simplest")
+    , ("M-a f",   sendMessage $ JumpToLayout "Full")
     ]
 
 --myAdditionalMouseBindings =
@@ -574,8 +581,6 @@ help = unlines ["The modifier key is 'super'. Keybindings:",
     "mod-p            Launch dmenu with .desktop files",
     "mod-Shift-p      Launch dmenu",
     "mod-Shift-c      Close/kill the focused window",
-    "mod-Space        Rotate through the available layout algorithms",
-    "mod-Shift-Space  Reset the layouts on the current workSpace to default",
     "mod-n            Resize/refresh viewed windows to the correct size",
     "",
     "-- Launch a specific program",
@@ -594,6 +599,14 @@ help = unlines ["The modifier key is 'super'. Keybindings:",
     "M-d c   Copy menu",
     "M-d s   Shutdown menu",
     "M-d t   tmux session menu",
+    "",
+    "-- Switch layout",
+    "M-<Space>   Rotate through the available layout algorithms",
+    "M-S-<Space> Reset the layouts on the current workSpace to default",
+    "M-a g       Switch to grid layout",
+    "M-a 2       Switch to two pane layout",
+    "M-a t       Switch to tabbed layout",
+    "M-a f       Switch to full layout",
     "",
     "-- Move focus up or down the window stack",
     "mod-Tab        Move focus to the next window",
