@@ -1,12 +1,10 @@
+#!/bin/sh
+
 #################################
 # bash and zsh config.          #
 #                               #
 # Sourced by .bashrc and .zshrc #
 #################################
-
-# Disable "Can't follow non-constant source.
-# Use a directive to specify location." warning.
-# shellcheck disable=SC1090
 
 #############
 # Functions #
@@ -17,41 +15,25 @@ getshell() {
 }
 
 isbash() {
-    [[ $(getshell) == *"bash"* ]]
+    [ "$(getshell)" = "bash" ]
 }
 
 iszsh() {
-    [[ $(getshell) == *"zsh"* ]];
+    [ "$(getshell)" = "zsh" ];
+}
+
+# Source if file exists and readable.
+mysource () {
+    [ -r "$1" ] && . "$1"
 }
 
 # Reload .bashrc or .zshrc depending on the shell.
 so() {
     if isbash; then
-        source "$HOME/.bashrc"
+        mysource "$HOME/.bashrc"
     elif iszsh; then
-        source "$HOME/.zshrc"
+        mysource "$HOME/.zshrc"
     fi
-}
-
-# Source if file exists and readable.
-mysource () {
-    [[ -r "$1" ]] && source "$1"
-}
-
-# Set tab title to $1.
-title() {
-    echo -ne "\033]0;$1\007"
-}
-
-# Working directory with '~'
-short_pwd() {
-    # Substitute home with '~'
-    pwd | sed "s|$HOME|~|"
-}
-
-# Set terminal tab title to working directory.
-title_pwd() {
-    title "$(short_pwd)"
 }
 
 # Go to a dir in ~/git
@@ -81,30 +63,59 @@ path_prepend() {
 }
 
 is_kitty() {
-    [[ $TERM == xterm-kitty ]];
+    [ "$TERM" = "xterm-kitty" ];
 }
 
 my_alias() {
-    # If 3 args:
-    #   $1: condition
-    #   $2: alias name
-    #   $3: command
-    # If 2 args: Set command $1 to alias $0
-    if [[ $# == 3 ]]; then
-        my_alias_conditional "$1" "$2" "$3"
+    # Disable "This expands when defined, not when used.
+    # Consider escaping." warning
+    # shellcheck disable=SC2139
+    alias "$1"="$2"
+}
 
-    elif [[ $# == 2 ]]; then
-        # Disable "This expands when defined, not when used.
-        # Consider escaping." warning
-        # shellcheck disable=SC2139
-        alias "$1"="$2"
+my_path() {
+    path_prepend "$@"
+}
+
+bazsh_ssh_agent() {
+
+    # From https://stackoverflow.com/a/18915067
+
+    SSH_ENV="$HOME/.ssh/agent-environment"
+    start_agent() {
+        echo "Initialising new SSH agent..."
+        /usr/bin/ssh-agent | sed 's/^echo/#echo/' > "${SSH_ENV}"
+        echo succeeded
+        chmod 600 "${SSH_ENV}"
+        . "${SSH_ENV}" > /dev/null
+        # ssh-add is run during xmonad startup by xmonad.hs
+        #/usr/bin/ssh-add;
+    }
+
+    # Source SSH settings, if applicable
+    if [ -f "${SSH_ENV}" ]; then
+        . "${SSH_ENV}" > /dev/null
+        #ps ${SSH_AGENT_PID} doesn't work under cywgin
+        ps -ef | grep "${SSH_AGENT_PID}" | grep ssh-agent$ > /dev/null || {
+            start_agent;
+        }
+    else
+        start_agent;
     fi
 }
 
-my_alias_conditional() {
-    # If $1 is true, set command $3 to alias $2
-    if $1; then
-        my_alias "$2" "$3"
+# Adapted from https://github.com/gokcehan/lf/blob/master/etc/lfcd.sh
+lfcd () {
+    tmp="$(mktemp)"
+    lf_ueberzug -last-dir-path="$tmp" "$@"
+    if [ -f "$tmp" ]; then
+        dir="$(cat "$tmp")"
+        rm -f "$tmp"
+        if [ -d "$dir" ]; then
+            if [ "$dir" != "$(pwd)" ]; then
+                cd "$dir" || exit 1
+            fi
+        fi
     fi
 }
 
@@ -112,38 +123,42 @@ my_alias_conditional() {
 # PATH #
 ########
 
-path_prepend '.'
-path_prepend "$HOME/git/scripts-public"
+my_path '.'
 
-if is_macos; then
-
-    path_prepend "$HOME/.jenv/bin"
-    path_prepend "$HOME/.rbenv/shims"
-    path_prepend /usr/local/opt/mysql@5.7/bin
-    path_prepend /Applications/kdiff3.app/Contents/MacOS
-    path_prepend /usr/local/sbin # brew
-
-elif is_linux; then
-
-    path_prepend "$HOME/.local/bin"
-    path_prepend "$HOME/git/jenv/bin"
-    path_prepend /opt/mysql-5.7.32-linux-glibc2.12-x86_64/bin
-fi
+. "$HOME/.config/my-shell/path.sh"
 
 ###############
 # Environment #
 ###############
 
+# Commented, ssh-agent is currently started by fish
+#if is_arch; then
+#    bazsh_ssh_agent
+#fi
+
 # Ignore "Declare and assign separately to avoid masking return values" warning.
-# shellcheck disable=SC2155
-export GPG_TTY=$(tty)
+GPG_TTY="$(tty)"
+export GPG_TTY
+
+export EDITOR='nvim'
+
+if has_go; then
+    if is_macos; then
+        export GOPATH="$HOME/go"
+        # Calling brew takes a few seconds
+        #export GOROOT="$(brew --prefix golang)/libexec"
+        export GOROOT="/usr/local/opt/go/libexec"
+    fi
+fi
 
 # Enable less to open compressed files .gz etc.
-export LESSOPEN="|/usr/local/bin/lesspipe.sh %s" LESS_ADVANCED_PREPROCESSOR=1
+if [ -f /usr/local/bin/lesspipe.sh ]; then
+    export LESSOPEN="|/usr/local/bin/lesspipe.sh %s" LESS_ADVANCED_PREPROCESSOR=1
+fi
 
 if is_linux; then
-    source /usr/share/doc/fzf/examples/key-bindings.bash
-    source /usr/share/doc/fzf/examples/completion.bash
+    mysource /usr/share/doc/fzf/examples/key-bindings.bash
+    mysource /usr/share/doc/fzf/examples/completion.bash
 fi
 
 export FZF_DEFAULT_COMMAND='find .'
@@ -151,12 +166,12 @@ export FZF_CTRL_T_COMMAND='find .'
 
 # jenv
 # Must be after jenv is added to path.
-if command -v jenv &> /dev/null; then
+if command -v jenv >/dev/null 2>&1; then
     eval "$(jenv init -)"
 fi
 
 # pyenv
-if command -v pyenv &> /dev/null; then
+if command -v pyenv >/dev/null 2>&1; then
     eval "$(pyenv init -)"
 fi
 
@@ -164,9 +179,5 @@ fi
 # Aliases #
 ###########
 
-source "$HOME/.config/my-shell/aliases.config"
-
-# Kitty.
-if is_kitty; then
-    my_alias ssh "TERM=xterm ssh"
-fi
+# shellcheck source=./aliases.config
+. "${HOME}/.config/my-shell/aliases.sh"

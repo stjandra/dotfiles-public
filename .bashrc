@@ -5,22 +5,7 @@
 #   $HOME/.config/my-shell/.bazshrc                                      #
 ##########################################################################
 
-# Disable "Can't follow non-constant source.
-# Use a directive to specify location." warning.
-# shellcheck disable=SC1090
-
 source "$HOME/.config/my-shell/.bazshrc"
-
-##################
-# Terminal Title #
-##################
-
-# Kitty: Set tab title to working directory.
-if is_kitty; then
-    if [[ $PROMPT_COMMAND != *"title_pwd"* ]]; then
-        PROMPT_COMMAND=${PROMPT_COMMAND:+"$PROMPT_COMMAND"}'title_pwd'
-    fi
-fi
 
 ##########
 # Prompt #
@@ -52,3 +37,15 @@ fi
 
 # Source work config.
 mysource "$HOME/.config/my-work/.bazshrc"
+
+###########
+# Start X #
+###########
+
+if is_linux; then
+    # TODO move to .bash_profile
+    # https://wiki.archlinux.org/title/Xinit#Autostart_X_at_login
+    if [ -z "${DISPLAY}" ] && [ "${XDG_VTNR}" -eq 1 ]; then
+        exec startx
+    fi
+fi

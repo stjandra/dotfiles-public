@@ -7,17 +7,6 @@
 
 source $HOME/.config/my-shell/.bazshrc
 
-##################
-# Terminal Title #
-##################
-
-# Kitty: Set tab title to working directory.
-if is_kitty; then
-    function precmd() {
-        title_pwd
-    }
-fi
-
 ##########
 # Prompt #
 ##########
