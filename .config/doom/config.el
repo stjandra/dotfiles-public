@@ -101,20 +101,23 @@
 ;; Without this, menu bar will appear in terminal emacsclient
 (menu-bar-mode -1)
 
+;; Ignore case (e.g., during projectile-switch-project)
+(setq completion-ignore-case  t)
+
 ;;;;;;;;;;;;;;;;;
 ;; Keybindings ;;
 ;;;;;;;;;;;;;;;;;
 
 (map!
-  :n  "C-h"   #'evil-window-left
-  :v  "C-h"   #'evil-window-left
-  :n  "C-j"   #'evil-window-down
-  :v  "C-j"   #'evil-window-down
-  :n  "C-k"   #'evil-window-up
-  :v  "C-k"   #'evil-window-up
-  :n  "C-l"   #'evil-window-right
-  :v  "C-l"   #'evil-window-right
-  )
+ :n  "C-h"   #'evil-window-left
+ :v  "C-h"   #'evil-window-left
+ :n  "C-j"   #'evil-window-down
+ :v  "C-j"   #'evil-window-down
+ :n  "C-k"   #'evil-window-up
+ :v  "C-k"   #'evil-window-up
+ :n  "C-l"   #'evil-window-right
+ :v  "C-l"   #'evil-window-right
+ )
 
 ;;;;;;;;;;;;;;
 ;; Org Mode ;;
@@ -155,19 +158,19 @@
 
 ;; Only use nyan mode in GUI.
 (add-hook 'after-make-frame-functions
-  (lambda
-    (frame)
-    (when
-      (display-graphic-p frame)
-      (use-package! nyan-mode
-        :config
-        (nyan-mode 1)
-        :init
-        (setq nyan-minimum-window-width 140)
-        )
-      )
-    )
-  )
+          (lambda
+            (frame)
+            (when
+                (display-graphic-p frame)
+              (use-package! nyan-mode
+                :config
+                (nyan-mode 1)
+                :init
+                (setq nyan-minimum-window-width 140)
+                )
+              )
+            )
+          )
 
 ;; Disable hl-line-mode in rainbow-mode
 ;; https://github.com/hlissner/doom-emacs/blob/develop/modules/tools/rgb/README.org
@@ -197,5 +200,5 @@
 
 ;; Work config.
 (if (file-exists-p "~/.config/my-work/config.el")
-  (load-file "~/.config/my-work/config.el")
+    (load-file "~/.config/my-work/config.el")
   )
