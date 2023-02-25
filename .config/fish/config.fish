@@ -2,6 +2,12 @@
 # fish Config #
 ###############
 
+# Do not load unnecessary config during non interactive for faster skhd
+# https://github.com/koekeishiya/skhd/issues/101
+if not status --is-interactive
+	exit
+end
+
 #############
 # Functions #
 #############
@@ -24,27 +30,12 @@ function is_kitty
     test -n $TERM && test "$TERM" = "xterm-kitty"
 end
 
-function my_alias -d 'Create an abbrv.'
-    # If 3 args:
-    #   $argv[1]: condition
-    #   $argv[2]: alias name
-    #   $argv[3]: command
-    # If 2 args: Set command $argv[2] to abbreviation $argv[1]
-    switch (count $argv)
-        case 3
-            my_alias_conditional $argv[1] $argv[2] $argv[3]
-        case 2
-            abbr -g $argv[1] $argv[2]
-        case '*'
-            echo "Invalid my_alias args"
-    end
+function my_alias -d 'Create an abbrv.' -a name command
+    abbr -g $name $command
 end
 
-function my_alias_conditional -d 'Create an abbrv if the condition is satisfied.' -a condition name command
-    # If $condition is true, set $command to abbreviation $name
-    if $condition
-        my_alias $name $command
-    end
+function my_path -d "Add path." -a path
+    fish_add_path $argv
 end
 
 function fish_prompt --description 'Write out the prompt'
@@ -95,27 +86,72 @@ function fish_title
     end
 end
 
+# https://github.com/ivakyb/fish_ssh_agent
+function __ssh_agent_is_started -d "check if ssh agent is already started"
+   if begin; test -f $SSH_ENV; and test -z "$SSH_AGENT_PID"; end
+      source $SSH_ENV > /dev/null
+   end
+
+   if test -z "$SSH_AGENT_PID"
+      return 1
+   end
+
+   ps -ef | grep $SSH_AGENT_PID | grep -v grep | grep -q ssh-agent
+   #pgrep ssh-agent
+   return $status
+end
+
+# https://github.com/ivakyb/fish_ssh_agent
+function __ssh_agent_start -d "start a new ssh agent"
+   ssh-agent -c | sed 's/^echo/#echo/' > $SSH_ENV
+   chmod 600 $SSH_ENV
+   source $SSH_ENV > /dev/null
+   true  # suppress errors from setenv, i.e. set -gx
+end
+
+# https://github.com/ivakyb/fish_ssh_agent
+function fish_ssh_agent --description "Start ssh-agent if not started yet, or uses already started ssh-agent."
+   if test -z "$SSH_ENV"
+      set -xg SSH_ENV $HOME/.ssh/environment
+   end
+
+   if not __ssh_agent_is_started
+      __ssh_agent_start
+   end
+end
+
+# Adapted from https://github.com/gokcehan/lf/blob/master/etc/lfcd.fish
+function lfcd
+    set tmp (mktemp)
+    lf_ueberzug -last-dir-path=$tmp $argv
+    if test -f "$tmp"
+        set dir (cat $tmp)
+        rm -f $tmp
+        if test -d "$dir"
+            if test "$dir" != (pwd)
+                cd $dir
+            end
+        end
+    end
+end
+
+function has_cmd
+    command -v "$argv" 1>/dev/null 2>&1
+end
+
 ########
 # PATH #
 ########
 
-fish_add_path $HOME/git/scripts-public
-
-if is_macos
-    fish_add_path $HOME/.jenv/bin
-    fish_add_path $HOME/.rbenv/shims
-    fish_add_path /usr/local/opt/mysql@5.7/bin
-    fish_add_path /Applications/kdiff3.app/Contents/MacOS
-    fish_add_path /usr/local/sbin # brew
-else if is_linux
-    fish_add_path $HOME/.local/bin
-    fish_add_path $HOME/git/jenv/bin
-    fish_add_path /opt/mysql-5.7.32-linux-glibc2.12-x86_64/bin
-end
+source $HOME/.config/my-shell/path.sh
 
 ###############
 # Environment #
 ###############
+
+if is_arch
+    fish_ssh_agent
+end
 
 # Supresses fish intro greeting.
 set fish_greeting
@@ -126,49 +162,67 @@ set GPG_TTY (tty)
 set FZF_DEFAULT_COMMAND 'find .'
 set FZF_CTRL_T_COMMAND  'find .'
 
-# kitty only.
-if is_kitty
+set -gx EDITOR 'nvim'
 
-    # Set the $SHELL variable, useful for vim and vifm to know which shell to use.
+if has_go
     if is_macos
-        set SHELL /usr/local/bin/fish
-    else if is_linux
-        set SHELL /usr/bin/fish
+        set -gx GOPATH "$HOME/go"
+        set -gx GOROOT "(brew --prefix golang)/libexec"
     end
+end
+
+# Set the $SHELL variable, useful for vim and vifm to know which shell to use.
+if is_macos
+    set SHELL /usr/local/bin/fish
+else if is_linux
+    set SHELL /usr/bin/fish
 end
 
 # pyenv init.
-if command -v pyenv 1>/dev/null 2>&1
+if has_cmd pyenv
   pyenv init - | source
 end
 
-# Enable less to open compressed files .gz etc.
-if is_linux
-    export LESSOPEN="| /usr/bin/lesspipe %s";
-    export LESSCLOSE="/usr/bin/lesspipe %s %s";
-end
-
-# jenv init on macOS.
-if type -q jenv
-    if is_macos
-        # From https://www.reddit.com/r/fishshell/comments/hs4dh3/anyone_using_jenv_under_fish_shell_im_getting_a/
-        status --is-interactive; and jenv init - fish | source
-    end
+# Enable less to open compressed files .gz, etc.
+if has_cmd lesspipe.sh
+    export LESSOPEN='|lesspipe.sh %s'
 end
 
 # Source work config.
-source $HOME/.config/my-work/config.fish
+if test -e $HOME/.config/my-work/config.fish
+    source $HOME/.config/my-work/config.fish
+end
+
+if is_macos
+
+    # Need C-o for neomutt binding
+    # https://apple.stackexchange.com/a/3255
+    stty discard undef
+
+    # Need C-y for neomutt binding
+    # https://stackoverflow.com/a/46310328
+    stty dsusp undef
+end
 
 ###########
 # Aliases #
 ###########
 
-source $HOME/.config/my-shell/aliases.config
+source $HOME/.config/my-shell/aliases.sh
 
 # Fish specific aliases.
 my_alias so "source $HOME/.config/fish/config.fish" # Reload fish config.
 
-#if is_kitty
-#    # Cannot use abbr because some abbr use ssh.
-#    alias ssh "TERM=xterm command ssh"
-#end
+###########
+# Start X #
+###########
+
+if is_linux
+    # https://wiki.archlinux.org/title/Fish#Start_X_at_login
+    # Start X at login
+    if status is-login
+        if test -z "$DISPLAY" -a "$XDG_VTNR" = 1
+            exec startx -- -keeptty
+        end
+    end
+end

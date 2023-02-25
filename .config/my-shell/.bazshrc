@@ -105,7 +105,7 @@ bazsh_ssh_agent() {
 }
 
 # Adapted from https://github.com/gokcehan/lf/blob/master/etc/lfcd.sh
-lfcd () {
+lfcd() {
     tmp="$(mktemp)"
     lf_ueberzug -last-dir-path="$tmp" "$@"
     if [ -f "$tmp" ]; then
@@ -117,6 +117,10 @@ lfcd () {
             fi
         fi
     fi
+}
+
+has_cmd() {
+    command -v "$1" >/dev/null 2>&1
 }
 
 ########
@@ -151,11 +155,6 @@ if has_go; then
     fi
 fi
 
-# Enable less to open compressed files .gz etc.
-if [ -f /usr/local/bin/lesspipe.sh ]; then
-    export LESSOPEN="|/usr/local/bin/lesspipe.sh %s" LESS_ADVANCED_PREPROCESSOR=1
-fi
-
 if is_linux; then
     mysource /usr/share/doc/fzf/examples/key-bindings.bash
     mysource /usr/share/doc/fzf/examples/completion.bash
@@ -166,13 +165,29 @@ export FZF_CTRL_T_COMMAND='find .'
 
 # jenv
 # Must be after jenv is added to path.
-if command -v jenv >/dev/null 2>&1; then
+if has_cmd jenv; then
     eval "$(jenv init -)"
 fi
 
 # pyenv
-if command -v pyenv >/dev/null 2>&1; then
+if has_cmd pyenv; then
     eval "$(pyenv init -)"
+fi
+
+# Enable less to open compressed files .gz, etc.
+if has_cmd lesspipe.sh; then
+    export LESSOPEN='|lesspipe.sh %s'
+fi
+
+if is_macos; then
+
+    # Need C-o for neomutt binding
+    # https://apple.stackexchange.com/a/3255
+    stty discard undef
+
+    # Need C-y for neomutt binding
+    # https://stackoverflow.com/a/46310328
+    stty dsusp undef
 fi
 
 ###########
