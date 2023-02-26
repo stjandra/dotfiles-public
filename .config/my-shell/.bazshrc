@@ -77,6 +77,10 @@ my_path() {
     path_prepend "$@"
 }
 
+my_export() {
+    export "$1"="$2"
+}
+
 bazsh_ssh_agent() {
 
     # From https://stackoverflow.com/a/18915067
@@ -140,28 +144,12 @@ my_path '.'
 #    bazsh_ssh_agent
 #fi
 
-# Ignore "Declare and assign separately to avoid masking return values" warning.
-GPG_TTY="$(tty)"
-export GPG_TTY
-
-export EDITOR='nvim'
-
-if has_go; then
-    if is_macos; then
-        export GOPATH="$HOME/go"
-        # Calling brew takes a few seconds
-        #export GOROOT="$(brew --prefix golang)/libexec"
-        export GOROOT="/usr/local/opt/go/libexec"
-    fi
-fi
+. "$HOME/.config/my-shell/export.sh"
 
 if is_linux; then
     mysource /usr/share/doc/fzf/examples/key-bindings.bash
     mysource /usr/share/doc/fzf/examples/completion.bash
 fi
-
-export FZF_DEFAULT_COMMAND='find .'
-export FZF_CTRL_T_COMMAND='find .'
 
 # jenv
 # Must be after jenv is added to path.
@@ -172,11 +160,6 @@ fi
 # pyenv
 if has_cmd pyenv; then
     eval "$(pyenv init -)"
-fi
-
-# Enable less to open compressed files .gz, etc.
-if has_cmd lesspipe.sh; then
-    export LESSOPEN='|lesspipe.sh %s'
 fi
 
 if is_macos; then

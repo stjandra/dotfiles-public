@@ -38,6 +38,10 @@ function my_path -d "Add path." -a path
     fish_add_path $argv
 end
 
+function my_export -d "Set environment variable." -a name value
+    set -gx $name $value
+end
+
 function fish_prompt --description 'Write out the prompt'
     # Mostly the default fish_prompt function with minor changes.
 
@@ -153,39 +157,14 @@ if is_arch
     fish_ssh_agent
 end
 
+source $HOME/.config/my-shell/export.sh
+
 # Supresses fish intro greeting.
 set fish_greeting
-
-set GPG_TTY (tty)
-
-# FZF to also consider dotfiles.
-set FZF_DEFAULT_COMMAND 'find .'
-set FZF_CTRL_T_COMMAND  'find .'
-
-set -gx EDITOR 'nvim'
-
-if has_go
-    if is_macos
-        set -gx GOPATH "$HOME/go"
-        set -gx GOROOT "(brew --prefix golang)/libexec"
-    end
-end
-
-# Set the $SHELL variable, useful for vim and vifm to know which shell to use.
-if is_macos
-    set SHELL /usr/local/bin/fish
-else if is_linux
-    set SHELL /usr/bin/fish
-end
 
 # pyenv init.
 if has_cmd pyenv
   pyenv init - | source
-end
-
-# Enable less to open compressed files .gz, etc.
-if has_cmd lesspipe.sh
-    export LESSOPEN='|lesspipe.sh %s'
 end
 
 # Source work config.
