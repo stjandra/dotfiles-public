@@ -1,0 +1,19 @@
+# vim: filetype=neomuttrc
+# muttrc file for account firstname_lastname@hotmail.com
+set realname = "Firstname Lastname"
+set from = "firstname_lastname@hotmail.com"
+set sendmail = "msmtp -a firstname_lastname@hotmail.com"
+alias me firstname_lastname <firstname_lastname@hotmail.com>
+set folder = "~/.local/share/mail/firstname_lastname@hotmail.com"
+set header_cache = "~/.cache/mutt/firstname_lastname_hotmail.com/headers"
+set message_cachedir = "~/.cache/mutt/firstname_lastname_hotmail.com/bodies"
+set mbox_type = Maildir
+set hostname = "hotmail.com"
+source $HOME/.config/mutt/switch.muttrc
+set spoolfile = "+Inbox"
+set postponed = "+Drafts"
+set trash = "+Trash"
+set record = "+Sent"
+
+macro index o "<shell-escape>mbsync firstname_lastname@hotmail.com && notmuch new<enter>" "sync firstname_lastname@hotmail.com"
+mailboxes "=Archive" "=Deleted" "=Drafts" "=Inbox" "=Junk" "=Notes" "=Outbox" "=POP" "=Sent"

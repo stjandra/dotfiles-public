@@ -1,0 +1,157 @@
+# vim: ft=neomuttrc
+
+# Some of the vi key bindings come from
+# /usr/local/Cellar/neomutt/20220429/share/doc/neomutt/vim-keys/vim-keys.rc
+
+# Some of the config come from muttwizard
+# https://github.com/LukeSmithxyz/mutt-wizard
+
+# Some of the color config come from catpuccin
+# https://github.com/catppuccin/neomutt
+
+# Sidebar
+set sidebar_visible = yes
+set sidebar_width = 20
+# Should the mailbox paths be abbreviated?
+set sidebar_short_path = yes
+# Enable extended mailbox mode to calculate total, new, and flagged
+# message counts for each mailbox.
+set mail_check_stats
+# D - Descriptive name of the mailbox
+# F - Number of flagged messages in the mailbox
+# N - Number of unread messages in the mailbox (seen or unseen)
+# S - Size of mailbox (total number of messages)
+# Optionally print a string if their value is nonzero
+# %?<sequence_char>?<optional_string>?
+set sidebar_format = '%D%?F? [%F]?%* %?N?%N/? %?S?%S?'
+
+# Index
+set date_format="%y-%m-%d %T"
+set index_format="%2C %Z %?X?A& ? %D %-30.30F %s (%-4.4c)"
+set sort = 'reverse-date'
+set mark_old = no # Unread mail stay unread until read
+
+# Pager
+# When set, the internal-pager will not move to the next message
+# when you are at the end of a message and invoke the <next-page>function
+set pager_stop = yes
+set pager_index_lines = 10    # number of index lines to show
+
+set send_charset="us-ascii:utf-8"
+
+#set wait_key = no               # mutt won't ask "press key to continue"
+
+set mailcap_path = $HOME/.config/mutt/mailcap
+auto_view text/html # automatically show html (mailcap uses lynx)
+alternative_order text/plain text/enriched text/html
+
+# Reply
+set fast_reply = yes # skip prompt for recipients (to, cc, bcc) and subject
+set include = yes # include the original mail in
+
+# Moving around
+bind attach,browser,index       g   noop
+bind attach,browser,index       gg  first-entry
+bind attach,browser,index       G   last-entry
+bind pager                      g   noop
+bind pager                      gg  top
+bind pager                      G   bottom
+bind pager                      k   previous-line
+bind pager                      j   next-line
+
+# Macro to open email with browser from mailcap
+# Adapted from https://blog.flaport.net/configuring-neomutt-for-email.html
+# By default, v binds to view-atachments,
+# but this is now mapped to l (pager), ll (index)
+macro index,pager v "<view-attachments><search>html<enter><view-mailcap><exit>"
+
+# jk is used to navigate undeleted entries.
+# Use up/down arrows to also navigate deleted entries.
+bind index                      <Up>   previous-entry
+bind index                      <Down> next-entry
+
+bind attach,pager h exit
+bind index h noop
+macro browser h '<change-dir><kill-line>..<enter>' "Go to parent folder"
+bind attach l view-mailcap
+bind pager l view-attachments
+bind index l display-message
+bind browser l select-entry
+
+# Search
+bind index L limit
+macro index A "<limit>all\n" "show all messages (undo limit)"
+macro index \Cf "<enter-command>unset wait_key<enter><shell-escape>printf 'Enter a search term to find with notmuch: '; read x; echo \$x >~/.cache/mutt_terms<enter><limit>~i \"\`notmuch search --output=messages \$(cat ~/.cache/mutt_terms) | head -n 600 | perl -le '@a=<>;s/\^id:// for@a;$,=\"|\";print@a' | perl -le '@a=<>; chomp@a; s/\\+/\\\\+/ for@a;print@a' \`\"<enter>" "show only messages matching a notmuch pattern"
+
+# Scrolling
+#bind attach,browser,pager,index \CF next-page
+# \CB is used to call urlview to extract URLs out of a message
+#bind attach,browser,pager,index \CB previous-page
+bind attach,browser,pager,index \Cu half-up
+bind attach,browser,pager,index \Cd half-down
+bind browser,pager,index        \Ce next-line
+bind browser,pager,index        \Cy previous-line
+
+bind pager,index                d   noop
+bind pager,index                dd  delete-message
+
+# Threads
+#bind browser,pager,index        N   search-opposite
+bind pager,index                dT  delete-thread
+bind pager,index                dt  delete-subthread
+bind pager,index                gt  next-thread
+bind pager,index                gT  previous-thread
+bind index                      za  collapse-thread
+bind index                      zA  collapse-all # Missing :folddisable/foldenable
+
+bind index,pager i noop
+
+# Move the highlight to the previous mailbox
+bind index,pager \Cp sidebar-prev
+# Move the highlight to the next mailbox
+bind index,pager \Cn sidebar-next
+# Open the highlighted mailbox
+bind index,pager \Co sidebar-open
+# Toggle the visibility of the Sidebar.
+bind index,pager B sidebar-toggle-visible
+
+color normal           default default     # Text is "Text"
+color index              green default ~N  # New Messages
+color index                red default ~F  # Flagged messages
+color index      brightmagenta default ~T  # Tagged Messages
+color index                red default ~D  # Messages to delete
+color attachment       magenta default     # Attachments
+color signature    brightblack default     # Signatures
+#color search              blue default     # Highlighted results
+
+color indicator        default brightblack # currently highlighted message Surface 2=Background Text=Foreground
+color error                red default     # error messages
+#color status       brightwhite default     # status line
+color tree         brightwhite default     # thread tree arrows
+color tilde        brightwhite default     # blank line padding
+
+color hdrdefault          blue default    # default headers
+color header     brightmagenta default "^From:"
+color header        brightcyan default "^Subject:"
+
+color quoted       brightwhite default
+color quoted1            white default
+color quoted2      brightblack default
+color quoted3            black default       
+color quoted4            black default
+color quoted5            black default
+
+color body green default [\-\.+_a-zA-Z0-9]+@[\-\.a-zA-Z0-9]+               # email addresses
+color body green default (https?|ftp)://[\-\.,/%~_:?&=\#a-zA-Z0-9]+        # URLs
+color body  blue default (^|[[:space:]])\\*[^[:space:]]+\\*([[:space:]]|$) # *bold* text
+color body  blue default (^|[[:space:]])_[^[:space:]]+_([[:space:]]|$)     # _underlined_ text
+color body  blue default (^|[[:space:]])/[^[:space:]]+/([[:space:]]|$)     # /italic/ text
+
+color sidebar_flagged         red default # Mailboxes with flagged mails
+color sidebar_new     brightgreen default # Mailboxes with new mail are
+
+
+source ~/.config/mutt/accounts/firstname_lastname@hotmail.com.muttrc
+macro index,pager i1 '<sync-mailbox><enter-command>source ~/.config/mutt/accounts/firstname_lastname@hotmail.com.muttrc<enter><change-folder>!<enter>;<check-stats>' "switch to firstname_lastname@hotmail.com"
+macro index,pager i2 '<sync-mailbox><enter-command>source ~/.config/mutt/accounts/firstname_lastname@gmail.com.muttrc<enter><change-folder>!<enter>;<check-stats>' "switch to firstname_lastname@gmail.com"
+macro index,pager i3 '<sync-mailbox><enter-command>source ~/.config/mutt/accounts/second@gmail.com.muttrc<enter><change-folder>!<enter>;<check-stats>' "switch to second@gmail.com"

@@ -28,24 +28,24 @@ ExpireUnread no
 
 # ==============================================================================
 
-IMAPStore firsname_lastname@gmail.com-remote
+IMAPStore firstname_lastname@gmail.com-remote
 Host imap.gmail.com
 Port 993
-User firsname_lastname@gmail.com
-PassCmd "pass firsname_lastname@gmail.com"
+User firstname_lastname@gmail.com
+PassCmd "pass firstname_lastname@gmail.com"
 AuthMechs LOGIN
 SSLType IMAPS
 CertificateFile /etc/ssl/cert.pem
 
-MaildirStore firsname_lastname@gmail.com-local
+MaildirStore firstname_lastname@gmail.com-local
 Subfolders Verbatim
-Path ~/.local/share/mail/firsname_lastname@gmail.com/
-Inbox ~/.local/share/mail/firsname_lastname@gmail.com/INBOX
+Path ~/.local/share/mail/firstname_lastname@gmail.com/
+Inbox ~/.local/share/mail/firstname_lastname@gmail.com/INBOX
 
-Channel firsname_lastname@gmail.com
+Channel firstname_lastname@gmail.com
 Expunge Both
-Far :firsname_lastname@gmail.com-remote:
-Near :firsname_lastname@gmail.com-local:
+Far :firstname_lastname@gmail.com-remote:
+Near :firstname_lastname@gmail.com-local:
 Patterns * !"[Gmail]/All Mail"
 Create Both
 SyncState *
