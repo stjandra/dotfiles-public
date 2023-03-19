@@ -1,0 +1,9 @@
+# vim: ft=cfg
+
+set selection-clipboard clipboard
+
+set font "fira code"
+
+# The following line could be changed by ~/git/scripts-public/change_theme
+# Please be careful when changing
+include theme-macchiato

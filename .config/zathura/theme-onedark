@@ -1,0 +1,41 @@
+# vim: ft=cfg
+
+# Colors from https://github.com/Binaryify/OneDark-Pro
+
+set default-fg                "#abb2bf"
+set default-bg                "#282c34"
+
+set completion-bg             "#3f4451"
+set completion-fg             "#abb2bf"
+set completion-highlight-bg   "#4f5666"
+set completion-highlight-fg   "#abb2bf"
+set completion-group-bg       "#3f4451"
+set completion-group-fg       "#4aa5f0"
+
+set statusbar-fg              "#abb2bf"
+set statusbar-bg              "#3f4451"
+
+set notification-bg           "#3f4451"
+set notification-fg           "#abb2bf"
+set notification-error-bg     "#3f4451"
+set notification-error-fg     "#ff616e"
+set notification-warning-bg   "#3f4451"
+set notification-warning-fg   "#f0a45d
+
+set inputbar-fg               "#abb2bf"
+set inputbar-bg               "#3f4451"
+
+set recolor-lightcolor        "#282c34"
+set recolor-darkcolor         "#abb2bf"
+
+set index-fg                  "#abb2bf"
+set index-bg                  "#282c34"
+set index-active-fg           "#abb2bf"
+set index-active-bg           "#3f4451"
+
+set render-loading-bg         "#282c34"
+set render-loading-fg         "#abb2bf"
+
+set highlight-color           "#4f5666"
+set highlight-fg              "#c162de"
+set highlight-active-color    "#c162de"

@@ -1,0 +1,41 @@
+# vim: ft=cfg
+
+# Colors from https://www.nordtheme.com
+
+set default-fg                "#D8DEE9"
+set default-bg                "#2E3440"
+
+set completion-bg             "#3B4252"
+set completion-fg             "#D8DEE9"
+set completion-highlight-bg   "#4C566A"
+set completion-highlight-fg   "#D8DEE9"
+set completion-group-bg       "#3B4252"
+set completion-group-fg       "#81A1C1"
+
+set statusbar-fg              "#D8DEE9"
+set statusbar-bg              "#3B4252"
+
+set notification-bg           "#3B4252"
+set notification-fg           "#D8DEE9"
+set notification-error-bg     "#3B4252"
+set notification-error-fg     "#BF616A"
+set notification-warning-bg   "#3B4252"
+set notification-warning-fg   "#EBCB8B"
+
+set inputbar-fg               "#D8DEE9"
+set inputbar-bg               "#3B4252"
+
+set recolor-lightcolor        "#2E3440"
+set recolor-darkcolor         "#D8DEE9"
+
+set index-fg                  "#D8DEE9"
+set index-bg                  "#2E3440"
+set index-active-fg           "#D8DEE9"
+set index-active-bg           "#3B4252"
+
+set render-loading-bg         "#2E3440"
+set render-loading-fg         "#D8DEE9"
+
+set highlight-color           "#4C566A"
+set highlight-fg              "#B48EAD"
+set highlight-active-color    "#B48EAD"
