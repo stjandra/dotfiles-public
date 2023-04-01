@@ -1,0 +1,98 @@
+
+set hlsearch
+set ignorecase smartcase
+set showmode
+set clipboard+=unnamed
+
+set number
+set relativenumber
+
+" https://github.com/JetBrains/ideavim/blob/master/doc/ideajoin-examples.md
+set ideajoin
+
+set idearefactormode=keep
+
+" Plugins
+set which-key
+set notimeout
+
+let mapleader = " "
+
+nnoremap <esc><esc> :nohlsearch<CR>
+
+nmap <leader>q :action CloseContent<CR>
+
+" Paste and delete without yanking
+" https://superuser.com/a/321726
+nnoremap <leader>d "_d
+vnoremap <leader>d "_d
+vnoremap <leader>p "_dP
+
+" Center cursor when doing C-d, C-u, and search next/prev (n/N)
+nmap <C-d> <C-d>zz
+nmap <C-u> <C-u>zz
+nmap n nzz
+nmap N Nzz
+
+" window navigation
+nmap <c-h> <c-w>h
+nmap <c-l> <c-w>l
+nmap <c-k> <c-w>k
+nmap <c-j> <c-w>j
+nmap H gT
+" Basically gt, but gt is mapped to something else below
+nmap L :action NextTab<CR>
+
+" debug
+nmap <leader>dc :action Resume<CR>
+nmap <leader>dd :action ChooseDebugConfiguration<CR>
+nmap <leader>di :action StepInto<CR>
+nmap <leader>do :action StepOver<CR>
+nmap <leader>du :action StepOut<CR>
+nmap <leader>dt :action ToggleLineBreakpoint<CR>
+
+" lsp
+nmap <leader>lr :action RenameElement<CR>
+
+" code refactoring
+nmap <leader>rt :action Refactorings.QuickListPopupAction<CR>
+vmap <leader>rc :action ExtractClass<CR>
+vmap <leader>re :action ExtractMethod<CR>
+nmap <leader>ri :action Inline<CR>
+nmap <leader>rv :action IntroduceVariable<CR>
+vmap <leader>rv :action IntroduceVariable<CR>
+
+" Search
+nmap <leader>sa :action GotoAction<CR>
+nmap <leader>sc :action GotoClass<CR>
+nmap <leader>sf :action GotoFile<CR>
+nmap <leader>ss :action GotoSymbol<CR>
+nmap <leader>s<S-f> :action RecentFiles<CR>
+
+" Toggle
+nmap <leader>tu :action UIToggleActions<CR>
+nmap <leader>tm :action MainMenu<CR>
+nmap <leader>tz :action ToggleDistractionFreeMode<CR>
+
+nmap g<S-f> :action FindUsages<CR>
+nmap gd :action GotoDeclaration<CR>
+nmap gr :action ShowUsages<CR>
+nmap gi :action GotoImplementation<CR>
+nmap gt :action GotoTest<CR>
+nmap gb :action Back<CR>
+nmap gf :action Forward<CR>
+
+nmap <c-o> :action Back<CR>
+nmap <c-i> :action Forward<CR>
+
+nnoremap [h :action VcsShowPrevChangeMarker<CR>
+nnoremap ]h :action VcsShowNextChangeMarker<CR>
+
+nnoremap [e :action GotoPreviousError<CR>
+nnoremap ]e :action GotoNextError<CR>
+
+" Reference: https://github.com/melihovv/cfgs/blob/master/roles/vim/files/.ideavimrc
+" Previous method.
+nnoremap [m :action MethodUp<CR>
+" Next method.
+nnoremap ]m :action MethodDown<CR>
